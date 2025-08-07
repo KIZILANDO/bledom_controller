@@ -18,8 +18,10 @@ var char = null;
 function searchBLEDom() {
 	navigator.bluetooth.requestDevice({
 		filters: [
-			{ services: ['0000fff0-0000-1000-8000-00805f9b34fb'] }
+			{ namePrefix: "ELK-BLEDOM" }
 		]
+		//acceptAllDevices: true, // all devices show up, just select the right one
+		//optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb'], // this is required to allow using the service
 	}).then(function(device) {
 		console.log(device);
 		device.addEventListener('gattserverdisconnected', onDisconnected);
@@ -36,9 +38,6 @@ function searchBLEDom() {
 		document.getElementById("searchBtn").style.display = "none";
 		document.getElementById("controls").style.display = "block";
 		setInterval(attackRelease, 75);
-		if (navigator.requestMIDIAccess) {
-			document.getElementById("midiBtn").style.display = "inline-block";
-		}
 		setColor(rgbColor.r, rgbColor.g, rgbColor.b);
 	}).catch(function(err) {
 		console.error(err);
@@ -65,7 +64,6 @@ function sendCommand(command, onSuccess) {
 function setColor(r, g, b, onSuccess) {
 	document.getElementById("customColorInput").value = rgbToHex(r, g, b);
 	document.getElementById("modeSelect").value = "null";
-	document.getElementById("dynamicSelect").value = "null";
 	var command = new Uint8Array([0x7e, 0x00, 0x05, 0x03, limitHex(r), limitHex(g), limitHex(b), 0x00, 0xef]).buffer;
 	sendCommand(command, onSuccess);
 }
@@ -128,22 +126,11 @@ function setModeEffect(effect) {
 	else {
 		throw new Exception(effect + " is not a valid effect");
 	}
-	document.getElementById("dynamicSelect").value = "null";
 }
 
-function setModeDynamic(dynamic) {
-	var command = new Uint8Array([0x7e, 0x00, 0x03, limitHex(dynamic), 0x04, 0x00, 0x00, 0x00, 0xef]).buffer;
-	sendCommand(command);
-	document.getElementById("modeSelect").value = "null";
-}
-
-function setSensitivityForDynamicMode(sensitivity) {
-	var command = new Uint8Array([0x7e, 0x00, 0x07, limitHex(sensitivity), 0x00, 0x00, 0x00, 0x00, 0xef]).buffer;
-	sendCommand(command);
-}
 
 function attackRelease() {
-	if (!midiEnabled && useKbd) {
+	if (useKbd) {
 		// [ R, G, B ]
 		var target = [0, 0, 0];
 		var threshold = 0.001;
