@@ -19,9 +19,9 @@ function searchBLEDom() {
 	navigator.bluetooth.requestDevice({
 		filters: [
 			{ namePrefix: "ELK-BLEDOM" }
-		]
+		],
 		//acceptAllDevices: true, // all devices show up, just select the right one
-		//optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb'], // this is required to allow using the service
+		optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb'], // this is required to allow using the service
 	}).then(function(device) {
 		console.log(device);
 		device.addEventListener('gattserverdisconnected', onDisconnected);
